@@ -26,11 +26,13 @@ void printMatrix(int *A) {
 }
 
 void fillVector(int num, int *A) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++)
         A[i] = num;
 }
 
 void fillMatrix(int num, int *A) {
+    #pragma omp parallel for
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             A[i*n + j] = num;
@@ -45,6 +47,7 @@ void fillMatrix(int num, int *A) {
 int * matrixMultiplication(int *A, int *B) {
     int *C = malloc(n*n* sizeof(int));
     int buf;
+    #pragma omp parallel for
     for (int i = 0; i < n; i++ ) {
         for (int j = 0; j < n; j++) {
             buf = 0;
@@ -66,6 +69,7 @@ int * matrixMultiplication(int *A, int *B) {
 int * vectorMatrixMultiplication(int *A, int *B) {
     int *C = malloc(n * sizeof(int));
     int buf;
+    #pragma omp parallel for
     for (int i = 0; i < n; i++ ) {
         buf = 0;
         for (int j = 0; j < n; j++) {
@@ -84,6 +88,7 @@ int * vectorMatrixMultiplication(int *A, int *B) {
  */
 int scalar(int *A, int *B) {
     int scalar = 0;
+    #pragma omp parallel for
     for (int i = 0; i < n; i++) {
         scalar += A[i] * B[i];
     }
@@ -100,6 +105,7 @@ int scalar(int *A, int *B) {
 int * matrixAddition(int *A, int *B) {
 
     int *C = malloc(n*n* sizeof(int));
+    #pragma omp parallel for
     for (int i = 0; i < n; i++ ) {
         for (int j = 0; j < n; j++) {
             C[i*n + j] = A[i*n + j] + B[i*n + j];
@@ -116,6 +122,7 @@ int * matrixAddition(int *A, int *B) {
  */
 int * numberVectorMultiplication(int num, int *A) {
     int *B = malloc(n * sizeof(int));
+    #pragma omp parallel for
     for (int i = 0; i < n; i++)
         B[i] = A[i] * num;
     return B;
@@ -128,6 +135,7 @@ int * numberVectorMultiplication(int num, int *A) {
  */
 int matrixMax(int *A) {
     int max = INT_MIN;
+    #pragma omp parallel for
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             if (A[i*n + j] > max)
