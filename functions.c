@@ -5,10 +5,9 @@
 #include "functions.h"
 #include <stdio.h>
 #include <limits.h>
+#include <stdlib.h>
 
-#define n   3
-#define nxn 9
-
+const int n   = 1000;
 const int num = 1;
 
 void printVector(int *A) {
@@ -44,7 +43,7 @@ void fillMatrix(int num, int *A) {
  * @param C=A*B - matrix
  */
 int * matrixMultiplication(int *A, int *B) {
-    static int C[nxn];
+    int *C = malloc(n*n* sizeof(int));
     int buf;
     for (int i = 0; i < n; i++ ) {
         for (int j = 0; j < n; j++) {
@@ -65,7 +64,7 @@ int * matrixMultiplication(int *A, int *B) {
  * @param C=A*B - vector
  */
 int * vectorMatrixMultiplication(int *A, int *B) {
-    static int C[n];
+    int *C = malloc(n * sizeof(int));
     int buf;
     for (int i = 0; i < n; i++ ) {
         buf = 0;
@@ -100,7 +99,7 @@ int scalar(int *A, int *B) {
  */
 int * matrixAddition(int *A, int *B) {
 
-    static int C[nxn];
+    int *C = malloc(n*n* sizeof(int));
     for (int i = 0; i < n; i++ ) {
         for (int j = 0; j < n; j++) {
             C[i*n + j] = A[i*n + j] + B[i*n + j];
@@ -116,7 +115,7 @@ int * matrixAddition(int *A, int *B) {
  * @param B=num*A - vector
  */
 int * numberVectorMultiplication(int num, int *A) {
-    static int B[n];
+    int *B = malloc(n * sizeof(int));
     for (int i = 0; i < n; i++)
         B[i] = A[i] * num;
     return B;
@@ -165,12 +164,12 @@ int * matrixSort(int *A) {
   */
 void threadFunction1() {
     printf("Thread1 start\n");
-    int MA[nxn];
-    int MD[nxn];
-    int a[n];
-    int b[n];
-    int c[n];
-    int d[n];
+    int *MA = malloc(n*n * sizeof(int));
+    int *MD = malloc(n*n * sizeof(int));
+    int *a = malloc(n * sizeof(int));
+    int *b = malloc(n * sizeof(int));
+    int *c = malloc(n * sizeof(int));
+    int *d = malloc(n * sizeof(int));
 
     fillVector(num, a);
     fillVector(num, b);
@@ -179,11 +178,21 @@ void threadFunction1() {
     fillMatrix(num, MA);
     fillMatrix(num, MD);
 
-    int e = scalar(a, b) + scalar(c, vectorMatrixMultiplication(b, matrixMultiplication(MA, MD)));
+    int *matrixBuf = matrixMultiplication(MA, MD);
+    int *vectorBuf = vectorMatrixMultiplication(b, matrixBuf);
+    int e = scalar(a, b) + scalar(c, vectorBuf);
 
     if (n < 7) {
         printf("T1: e = %d\n", e);
     }
+    free(matrixBuf);
+    free(vectorBuf);
+    free(MA);
+    free(MD);
+    free(a);
+    free(b);
+    free(c);
+    free(d);
 
     printf("Thread1 finish\n");
 }
@@ -193,21 +202,27 @@ void threadFunction1() {
   */
 void threadFunction2() {
     printf("Thread2 start\n");
-    int MF[nxn];
-    int MG[nxn];
-    int MH[nxn];
+    int *MF = malloc(n*n * sizeof(int));
+    int *MG = malloc(n*n * sizeof(int));
+    int *MH = malloc(n*n * sizeof(int));
 
     fillMatrix(num, MF);
     fillMatrix(num, MG);
     fillMatrix(num, MH);
 
-    int *ML = matrixSort(matrixAddition(MF, matrixMultiplication(MG, MH)));
+    int *matrixBuf1 = matrixMultiplication(MG, MH);
+    int *matrixBuf2 = matrixAddition(MF, matrixBuf1);
+    int *ML = matrixSort(matrixBuf2);
 
     if (n < 7) {
         printf("T2: ML =\n");
         printMatrix(ML);
     }
-
+    free(matrixBuf1);
+    free(matrixBuf2);
+    free(MF);
+    free(MG);
+    free(MH);
 
     printf("Thread2 finish\n");
 }
@@ -217,20 +232,27 @@ void threadFunction2() {
   */
 void threadFunction3() {
     printf("Thread3 start\n");
-    int MP[nxn];
-    int MR[nxn];
-    int T[n];
+    int *MP = malloc(n*n * sizeof(int));
+    int *MR = malloc(n*n * sizeof(int));
+    int *T  = malloc(n * sizeof(int));
 
     fillMatrix(num, MP);
     fillMatrix(num, MR);
     fillVector(num, T);
 
-    int *O = numberVectorMultiplication(matrixMax(matrixMultiplication(MP, MR)), T);
+    int *matrixBuf = matrixMultiplication(MP, MR);
+    int *O = numberVectorMultiplication(matrixMax(matrixBuf), T);
 
     if (n < 7) {
         printf("T3: O = ");
         printVector(O);
     }
+
+    free(matrixBuf);
+    free(MP);
+    free(MR);
+    free(T);
+    free(O);
 
     printf("Thread3 finish\n");
 }
